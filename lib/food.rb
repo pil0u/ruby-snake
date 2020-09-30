@@ -5,8 +5,9 @@ class Food
 	TILE_SIZE = Config::TILE_SIZE
 
 	def initialize(x, y)
-		# @x = TILE_SIZE
-		# @y = 0
+    @image = Gosu::Image.new("./media/food.png")
+    @sound = Gosu::Sample.new("./media/food.mp3")
+
 		@x = x
 		@y = y
 	end
@@ -22,8 +23,17 @@ class Food
 		@x == snake.x && @y == snake.y
 	end
 
+  def play_sound
+    @sound.play
+  end
+
 	def draw
-		Gosu.draw_rect(@x, @y, TILE_SIZE, TILE_SIZE, Gosu::Color::RED)
+		# Gosu.draw_rect(@x, @y, TILE_SIZE, TILE_SIZE, Gosu::Color::RED)
+    @image.draw(
+      @x, @y, 0,
+      scale_x=TILE_SIZE.to_f/@image.width,
+      scale_y=TILE_SIZE.to_f/@image.width
+    )
 	end
 
 end

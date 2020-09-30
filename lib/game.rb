@@ -6,83 +6,113 @@ require_relative 'snake'
 require_relative 'food'
 
 class Game < Gosu::Window
-	
+
 	TILE_SIZE = Config::TILE_SIZE
 	WINDOW_SIZE = Config::WINDOW_SIZE
-	START_SPEED = Config::START_SPEED
+	INITIAL_SPEED_LEVEL = Config::INITIAL_SPEED_LEVEL
+	SPEED_ACCELERATION_RATE = Config::SPEED_ACCELERATION_RATE
+	HIGH_SCORE_PATH = Config::HIGH_SCORE_PATH
 
 	# Méthode "constructeur"
 	def initialize
 		super WINDOW_SIZE, WINDOW_SIZE
 		self.caption = "Snakiscount"
+		@background_image = Gosu::Image.new('./media/background.jpg', tileable: true)
+		@font = Gosu::Font.new(24)
 
-		# @background_image = Gosu::Image.new('./media/background.jpg', tileable: true)
 		@snake = Snake.new
-		# @food = Food.new
 		@food = Food.popup
 
-		@speed = START_SPEED
-		@last_move = Time.now
+		@speed_level = INITIAL_SPEED_LEVEL
+		update_refresh_rate
+		@time_last_move = Time.now
+
+		@score = 0
+		initialize_highscore
 	end
 
 	# Méthode pour mettre à jour la logique du jeu
 	# Elle est appelée 60 fois par seconde
 	def update
-		return if (Time.now - @last_move) < @speed
-		
+		return if (Time.now - @time_last_move) < @refresh_rate
+
 		update_direction
 		@snake.move
-		@last_move = Time.now
+		@time_last_move = Time.now
 
 		if @snake.dead?
-			sleep(2)
+			@snake.play_dead_sound
+			sleep(3)
+
+			if @score > @highscore
+				@highscore = @score
+				update_highscore(@highscore)
+			end
+
 			reset_game
 		end
 
 		if @food.eaten_by?(@snake)
-			@snake.expand
+			@food.play_sound
 			@food = Food.popup
+
+			@snake.expand
+			accelerate
+
+			@score += 1
 		end
 
 		p @snake
 		p @food
-
-		# 	for j in (0..TILE_SIZE)
-		# 		Gosu.draw_rect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE,
-		# 			(i+j) % 2 == 0 ? Gosu::Color::WHITE : Gosu::Color::BLACK
-		# 			# [
-		# 			# 	Gosu::Color::RED,
-		# 			# 	Gosu::Color::YELLOW,
-		# 			# 	Gosu::Color::BLUE,
-		# 			# 	Gosu::Color::GREEN,
-		# 			# 	Gosu::Color::WHITE,
-		# 			# 	Gosu::Color::GRAY,
-		# 			# 	Gosu::Color::BLACK,
-		# 			# 	Gosu::Color::AQUA,
-		# 			# 	Gosu::Color::FUCHSIA,
-		# 			# 	Gosu::Color::CYAN,
-		# 			# ].sample
-		# 			)
-		# 		# puts "#{i} / #{j}"
-		# 	end
-		# end
-		# raise
 	end
 
-	# Méthode pour mettre à jour l'affichage, le rendu du jeu
+	# Méthode pour mettre à jour l'affichage, le rendu du jeu (pas de logique)
 	# Elle est _normalement_ appelée 60 fois par seconde
 	def draw
-		# @background_image.draw(0, 0, 0)
+		@background_image.draw(0, 0, 0)
+
 		@snake.draw
 		@food.draw
+
+		@font.draw_text("Score: #{@score} / High score: #{@highscore}", 10, 10, 0, 1, 1, color=Gosu::Color::YELLOW)
 	end
 
 	private
 
+	def initialize_highscore
+		if File.exist? HIGH_SCORE_PATH
+			file = File.open(HIGH_SCORE_PATH)
+			@highscore = file.readlines.last.split(' --- ').last.to_i
+			file.close
+		else
+			@highscore = 0
+			update_highscore(@highscore)
+		end
+	end
+
+	def update_highscore(score)
+		file = File.new(HIGH_SCORE_PATH, "a")
+		file.puts("#{Time.now.strftime("%Y-%m-%d %H:%M:%S")} --- #{score}")
+		file.close
+	end
+
 	def reset_game
-		@speed = START_SPEED
+		@speed_level = INITIAL_SPEED_LEVEL
+		update_refresh_rate
+
 		@snake = Snake.new
 		@food = Food.popup
+
+		@score = 0
+	end
+
+	def update_refresh_rate
+		@refresh_rate = 1.0 / @speed_level
+	end
+
+	def accelerate
+		@speed_level *= (1 + SPEED_ACCELERATION_RATE)
+		update_refresh_rate
 	end
 
 	def button_up(id)

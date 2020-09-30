@@ -2,6 +2,7 @@ require_relative '../config'
 require_relative 'coordinate'
 
 class Snake
+
 	attr_reader :x, :y
 	attr_accessor :direction
 
@@ -9,6 +10,8 @@ class Snake
   WINDOW_SIZE = Config::WINDOW_SIZE
 
 	def initialize
+    @dead_sound = Gosu::Sample.new("./media/dead.mp3")
+
 		@x = 0
 		@y = TILE_SIZE
 		@tail_tiles = []
@@ -19,7 +22,13 @@ class Snake
 
   def dead?
     outside_window = (@x < 0 || @x >= WINDOW_SIZE || @y <0 || @y >= WINDOW_SIZE)
-    return outside_window
+    on_itself = @tail_tiles.include? [@x, @y]
+
+    return outside_window || on_itself
+  end
+
+  def play_dead_sound
+    @dead_sound.play
   end
 
 	def expand

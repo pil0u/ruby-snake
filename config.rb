@@ -7,8 +7,12 @@ class Config
 	WINDOW_SIZE = TILE_SIZE ** 2
 
 	# Vitesse initiale du serpent
-	START_SPEED = 0.1
-	# # Pourcentage d'augmentation de la vitesse du serpent
-	# # Ce pourcentage est appliqué à chaque fois qu'il mange un fruit
- 	# PERCENT_SPEED_INCREASE = 3
+  INITIAL_SPEED_LEVEL = 10
+	# Incrément d'accélération de la vitesse du serpent
+	# Ce pourcentage est appliqué à chaque fois qu'il mange un fruit
+  SPEED_ACCELERATION_RATE = 0.03
+
+  # Chemin de sauvegarde des highscores
+  HIGH_SCORE_PATH = "highscores.txt"
+
 end
