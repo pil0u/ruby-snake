@@ -31,5 +31,4 @@ class Coordinate < Hash
   def y=(value)
     self[:y] = value
   end
-
 end

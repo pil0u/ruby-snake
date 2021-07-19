@@ -3,22 +3,22 @@ require_relative 'coordinate'
 
 class Snake
 
-	attr_reader :x, :y
-	attr_accessor :direction
+  attr_reader :x, :y
+  attr_accessor :direction
 
-	TILE_SIZE = Config::TILE_SIZE
+  TILE_SIZE = Config::TILE_SIZE
   WINDOW_SIZE = Config::WINDOW_SIZE
 
-	def initialize
+  def initialize
     @dead_sound = Gosu::Sample.new("./media/dead.mp3")
 
-		@x = 0
-		@y = TILE_SIZE
-		@tail_tiles = []
-		@tail_length = 0
+    @x = 0
+    @y = TILE_SIZE
+    @tail_tiles = []
+    @tail_length = 0
 
-		@direction = "right"
-	end
+    @direction = "right"
+  end
 
   def dead?
     outside_window = (@x < 0 || @x >= WINDOW_SIZE || @y <0 || @y >= WINDOW_SIZE)
@@ -53,5 +53,4 @@ class Snake
 			Gosu.draw_rect(tail_tile[0], tail_tile[1], TILE_SIZE, TILE_SIZE, Gosu::Color::WHITE)
 		end
 	end
-
 end
